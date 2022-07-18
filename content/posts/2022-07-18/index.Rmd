@@ -1,0 +1,129 @@
+---
+title: "caret Package！"
+author: "曹群发"
+date: 2022-07-18T21:13:14-05:00
+categories:
+- R
+- caret
+tags:
+  - R
+  - Classification And REgression Training
+  - 数据集分割
+  - 数据预处理
+  - 特征选择
+  - 重抽样模型调整
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(collapse = TRUE)
+```
+
+今天给大家介绍一个R包，**caret（Classification And REgression Training的缩写）**主要用于创建预测模型。主要的工具有：
+
+- 数据集分割。
+- 数据预处理。
+- 特征（变量）选择。
+- 使用重抽样进行模型调整。
+- 变量重要性的评估。
+
+# 数据可视
+
+这里使用数据集 **iris**进行分类问题进行测试说明，下面看下数据集的每个特征（变量）的情况，这里使用函数*str()*。
+
+```{r}
+str(iris)
+```
+
+从上面返回的结果，我们可以看出，**iris**数据集中有150个观测值，5个特征（变量），下面主要用 **lattice**包对数据进行可视化。
+
+**Scatterplot Matrix** 展示：
+
+```{r ,fig.height=8}
+library(AppliedPredictiveModeling)
+library(lattice)
+transparentTheme(trans = .6) ###trans用于调整点的透明度。
+library(caret)
+featurePlot(x = iris[, 1:4], 
+            y = iris$Species, 
+            plot = "pairs",
+            auto.key = list(columns = 3))
+```
+
+**Scatterplot Matrix 添加椭圆** 展示：
+
+```{r ,fig.height=8}
+featurePlot(x = iris[, 1:4], 
+            y = iris$Species, 
+            plot = "ellipse",
+            auto.key = list(columns = 3))
+```
+
+密度曲线展示：
+
+```{r ,fig.height=4, fig.width=8}
+transparentTheme(trans = .9)
+featurePlot(x = iris[, 1:4], 
+            y = iris$Species,
+            plot = "density", 
+            scales = list(x = list(relation="free"), 
+                          y = list(relation="free")), 
+            adjust = 1.5, 
+            pch = "|", 
+            layout = c(4, 1), 
+            auto.key = list(columns = 3))
+```
+
+**Box Plot**展示：
+
+```{r ,fig.height=4, fig.width=8}
+featurePlot(x = iris[, 1:4], 
+            y = iris$Species, 
+            plot = "box", 
+            ## Pass in options to bwplot() 
+            scales = list(y = list(relation="free"),
+                          x = list(rot = 90)),  
+            layout = c(4,1 ),  
+            auto.key = list(columns = 2))
+```
+
+散点图展示：
+
+对于回归问题，这里使用 Boston Housing 数据集。
+
+```{r}
+library(mlbench)
+data(BostonHousing)
+regVar <- c("age", "lstat", "tax")
+str(BostonHousing[, regVar])
+```
+
+预测变量是连续的，**featurePlot**可以 函数画散点图，展示每个预测变量和响应变量的之间的关系。
+
+```{r ,fig.height=4, fig.width=8}
+theme1 <- trellis.par.get()
+theme1$plot.symbol$col = rgb(.2, .2, .2, .4)
+theme1$plot.symbol$pch = 16
+theme1$plot.line$col = rgb(1, 0, 0, .7)
+theme1$plot.line$lwd <- 2
+trellis.par.set(theme1)
+featurePlot(x = BostonHousing[, regVar], 
+            y = BostonHousing$medv, 
+            plot = "scatter", 
+            layout = c(3, 1))
+```
+
+添加趋势线。
+
+
+```{r ,fig.height=4, fig.width=8}
+theme1 <- trellis.par.get()
+featurePlot(x = BostonHousing[, regVar], 
+            y = BostonHousing$medv, 
+            plot = "scatter",
+            type = c("p", "smooth"),
+            span = .5,
+            layout = c(3, 1))
+```
+
+
